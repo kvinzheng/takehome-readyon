@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import type { BalanceApiResponse } from "@/types";
 
 interface Props {
-  employeeId: string;
   balances: BalanceApiResponse[];
   onSubmit: (payload: {
     locationId: string;
@@ -26,7 +25,6 @@ function calcDays(start: string, end: string): number {
 }
 
 export function TimeOffForm({
-  employeeId,
   balances,
   onSubmit,
   isSubmitting,

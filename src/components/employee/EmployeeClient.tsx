@@ -48,7 +48,6 @@ export function EmployeeClient({ employeeId, initialBalances, initialRequests }:
         )}
         {optimisticBalances.length > 0 && (
           <TimeOffForm
-            employeeId={employeeId}
             balances={optimisticBalances}
             onSubmit={handleSubmit}
             isSubmitting={isSubmitting}

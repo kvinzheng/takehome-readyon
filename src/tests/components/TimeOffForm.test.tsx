@@ -35,7 +35,6 @@ describe('TimeOffForm', () => {
   it('renders location options from balances', () => {
     render(
       <TimeOffForm
-        employeeId="emp-1"
         balances={balances}
         onSubmit={onSubmit}
       />
@@ -47,7 +46,6 @@ describe('TimeOffForm', () => {
   it('shows validation error when submitted without dates', async () => {
     render(
       <TimeOffForm
-        employeeId="emp-1"
         balances={balances}
         onSubmit={onSubmit}
       />
@@ -60,7 +58,6 @@ describe('TimeOffForm', () => {
   it('shows insufficient balance error when days exceed available', async () => {
     render(
       <TimeOffForm
-        employeeId="emp-1"
         balances={balances}
         onSubmit={onSubmit}
       />
@@ -82,7 +79,6 @@ describe('TimeOffForm', () => {
   it('calls onSubmit with correct payload for valid request', async () => {
     render(
       <TimeOffForm
-        employeeId="emp-1"
         balances={balances}
         onSubmit={onSubmit}
       />
@@ -107,7 +103,6 @@ describe('TimeOffForm', () => {
   it('disables submit button while submitting', () => {
     render(
       <TimeOffForm
-        employeeId="emp-1"
         balances={balances}
         onSubmit={onSubmit}
         isSubmitting
@@ -119,7 +114,6 @@ describe('TimeOffForm', () => {
   it('renders external error from HCM', () => {
     render(
       <TimeOffForm
-        employeeId="emp-1"
         balances={balances}
         onSubmit={onSubmit}
         error="HCM rejected: insufficient balance"
@@ -132,7 +126,7 @@ describe('TimeOffForm', () => {
 describe('TimeOffForm a11y', () => {
   it('idle state has no violations', async () => {
     const { container } = render(
-      <TimeOffForm employeeId="emp-1" balances={balances} onSubmit={() => {}} />
+      <TimeOffForm balances={balances} onSubmit={() => {}} />
     );
     expect(await axe(container)).toHaveNoViolations();
   });
@@ -140,7 +134,6 @@ describe('TimeOffForm a11y', () => {
   it('error state has no violations', async () => {
     const { container } = render(
       <TimeOffForm
-        employeeId="emp-1"
         balances={balances}
         onSubmit={() => {}}
         error="HCM is unavailable"
@@ -152,7 +145,6 @@ describe('TimeOffForm a11y', () => {
   it('submitting (disabled) state has no violations', async () => {
     const { container } = render(
       <TimeOffForm
-        employeeId="emp-1"
         balances={balances}
         onSubmit={() => {}}
         isSubmitting
