@@ -1,10 +1,10 @@
 "use client";
 
 import React from "react";
-import type { HcmBalanceResponse } from "@/types";
+import type { BalanceApiResponse } from "@/types";
 
 interface Props {
-  balance: HcmBalanceResponse;
+  balance: BalanceApiResponse;
   isOptimistic?: boolean;
   isSyncing?: boolean;
   isStale?: boolean;

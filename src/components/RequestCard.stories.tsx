@@ -73,7 +73,7 @@ export const OptimisticRolledBack: Story = {
     request: {
       ...baseRequest,
       status: 'rolled_back',
-      hcmError: 'HCM did not confirm this request. Balance has been restored.',
+      ptoError: 'HCM did not confirm this request. Balance has been restored.',
     },
     onApprove: undefined,
     onDeny: undefined,
@@ -86,7 +86,7 @@ export const HcmRejected: Story = {
     request: {
       ...baseRequest,
       status: 'denied',
-      hcmError: 'Insufficient balance: 3 days available, 5 requested.',
+      ptoError: 'Insufficient balance: 3 days available, 5 requested.',
     },
     onApprove: undefined,
     onDeny: undefined,

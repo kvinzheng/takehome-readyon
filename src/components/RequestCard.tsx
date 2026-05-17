@@ -1,12 +1,12 @@
 "use client";
 
 import React from "react";
-import type { TimeOffRequest, HcmBalanceResponse } from "@/types";
+import type { TimeOffRequest, BalanceApiResponse } from "@/types";
 import { format } from "date-fns";
 
 interface Props {
   request: TimeOffRequest;
-  balance?: HcmBalanceResponse;
+  balance?: BalanceApiResponse;
   onApprove?: (id: string) => void;
   onDeny?: (id: string) => void;
   isActing?: boolean;
@@ -75,13 +75,13 @@ export function RequestCard({
         </div>
       )}
 
-      {request.hcmError && (
+      {request.ptoError && (
         <p
           role="alert"
           className="mt-2 text-xs text-red-600"
           data-testid="hcm-error"
         >
-          HCM: {request.hcmError}
+          HCM: {request.ptoError}
         </p>
       )}
 

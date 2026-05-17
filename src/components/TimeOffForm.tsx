@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import type { HcmBalanceResponse } from "@/types";
+import type { BalanceApiResponse } from "@/types";
 
 interface Props {
   employeeId: string;
-  balances: HcmBalanceResponse[];
+  balances: BalanceApiResponse[];
   onSubmit: (payload: {
     locationId: string;
     startDate: string;

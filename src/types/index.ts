@@ -43,13 +43,13 @@ export interface TimeOffRequest {
   status: RequestStatus;
   createdAt: string;
   updatedAt: string;
-  hcmError?: string; // populated when HCM rejects
+  ptoError?: string; // populated when HCM rejects
 }
 
-// ─── HCM API shapes ─────────────────────────────────────────────────────────
+// ─── PTO API shapes ─────────────────────────────────────────────────────────
 
 /** Response from GET /api/hcm/balance (single cell) */
-export interface HcmBalanceResponse {
+export interface BalanceApiResponse {
   employeeId: string;
   locationId: string;
   available: number;
@@ -59,13 +59,13 @@ export interface HcmBalanceResponse {
 }
 
 /** Response from GET /api/hcm/balances/batch */
-export interface HcmBatchResponse {
-  balances: HcmBalanceResponse[];
+export interface BatchBalanceApiResponse {
+  balances: BalanceApiResponse[];
   generatedAt: string;
 }
 
 /** Body for POST /api/hcm/requests */
-export interface HcmSubmitRequestBody {
+export interface SubmitTimeOffPayload {
   employeeId: string;
   locationId: string;
   startDate: string;
@@ -75,18 +75,18 @@ export interface HcmSubmitRequestBody {
 }
 
 /** Response from POST /api/hcm/requests */
-export interface HcmSubmitRequestResponse {
+export interface TimeOffSubmissionResponse {
   requestId: string;
   status: "accepted" | "rejected" | "silent_failure";
   message?: string;
-  newBalance?: HcmBalanceResponse;
+  newBalance?: BalanceApiResponse;
 }
 
 /** Response from PATCH /api/hcm/requests/:id */
-export interface HcmApprovalResponse {
+export interface ApprovalResponse {
   requestId: string;
   status: "approved" | "denied";
-  balance?: HcmBalanceResponse;
+  balance?: BalanceApiResponse;
 }
 
 // ─── UI State ────────────────────────────────────────────────────────────────
