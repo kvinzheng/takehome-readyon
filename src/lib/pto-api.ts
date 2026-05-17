@@ -12,7 +12,7 @@ import type {
   TimeOffRequest,
 } from "@/types";
 
-const BASE = "/api/pto";
+const BASE = "/route/pto";
 
 async function apiFetch<T>(
   input: RequestInfo,

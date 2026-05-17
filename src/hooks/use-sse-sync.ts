@@ -18,7 +18,7 @@ export function useSSESync() {
   useEffect(() => {
     if (typeof EventSource === "undefined") return;
 
-    const es = new EventSource("/api/pto/events");
+    const es = new EventSource("/route/pto/events");
     es.addEventListener("balance-update", () => {
       router.refresh();
     });
