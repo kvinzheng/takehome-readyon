@@ -15,6 +15,17 @@ vi.mock('next-auth/react', () => ({
   SessionProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
+// UserContext wraps useAuth() which wraps useSession(). In tests useSession is
+// already stubbed above, so we just need UserProvider to be a passthrough and
+// useUser() to return the same mocked session user.
+vi.mock('@/context/UserContext', () => ({
+  useUser: () => ({
+    user: { id: 'emp-1', name: 'Test Employee', email: 'emp@test.com', role: 'employee' as const },
+    isLoading: false,
+  }),
+  UserProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 // next/navigation is not mounted in jsdom. Provide stable stubs so components
 // that call useRouter() (e.g. for router.refresh() after an SSE event) don't throw.
 vi.mock('next/navigation', () => ({
