@@ -25,7 +25,6 @@ const meta: Meta<typeof TimeOffForm> = {
   title: 'Components/TimeOffForm',
   component: TimeOffForm,
   args: {
-    employeeId: 'emp-1',
     balances,
     onSubmit: fn(),
   },

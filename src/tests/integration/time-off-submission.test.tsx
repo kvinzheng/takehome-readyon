@@ -63,7 +63,6 @@ describe('Optimistic update: balance deduction', () => {
       <Wrapper>
         <BalanceCard balance={seedBalance} isOptimistic={false} />
         <TimeOffForm
-          employeeId="emp-1"
           balances={[seedBalance]}
           onSubmit={() => {}}
         />
@@ -78,7 +77,6 @@ describe('Optimistic update: balance deduction', () => {
       <Wrapper>
         <BalanceCard balance={{ ...seedBalance, available: 7 }} isOptimistic />
         <TimeOffForm
-          employeeId="emp-1"
           balances={[seedBalance]}
           onSubmit={() => {}}
           isSubmitting
