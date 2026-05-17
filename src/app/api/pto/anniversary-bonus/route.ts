@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { grantAnniversaryBonus, EMPLOYEES, LOCATIONS } from "@/lib/pto-store";
+import { emitBalanceUpdate } from "@/lib/sse-bus";
 
 /**
  * POST /api/pto/anniversary-bonus
@@ -32,8 +33,17 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Invalidate the server cache so the next page render reflects the new balance.
-  // The employee will see updated data on their next router.refresh() or navigation.
+  // Push a balance-update event to every connected SSE client (browser tab).
+  // EmployeeClient listens on /api/pto/events and calls router.refresh() on receipt,
+  // which triggers Next.js to re-render the Server Component with the new balance.
+  emitBalanceUpdate({
+    employeeId,
+    locationId,
+    bonus: 5,
+    reason: "anniversary",
+  });
+
+  // Also invalidate the server cache so tabs that reconnect later see fresh data.
   revalidatePath("/employee");
 
   return NextResponse.json({

@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useOptimistic, useTransition } from "react";
+import React, { useState, useOptimistic, useTransition, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { BalanceCard } from "./BalanceCard";
 import { TimeOffForm } from "./TimeOffForm";
 import { RequestCard } from "./RequestCard";
@@ -15,7 +16,20 @@ interface Props {
 }
 
 export function EmployeeClient({ employeeId, initialBalances, initialRequests }: Props) {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
+
+  // Subscribe to server-sent balance updates (e.g. anniversary bonus).
+  // When the server emits a balance-update event, router.refresh() re-renders
+  // the Server Component with fresh data — no polling required.
+  useEffect(() => {
+    if (typeof EventSource === "undefined") return; // jsdom / SSR guard
+    const es = new EventSource("/api/pto/events");
+    es.addEventListener("balance-update", () => {
+      router.refresh();
+    });
+    return () => es.close();
+  }, [router]);
   // Separate from isPending: useTransition's isPending can lag in jsdom test environments
   // because React 19 async transitions flush differently outside a real browser.
   // isSubmitting is set synchronously in finally so the Pending badge always clears.
