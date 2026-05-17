@@ -67,21 +67,21 @@ export const Denied: Story = {
   },
 };
 
-/** Optimistic rolled back — HCM silently failed */
+/** Optimistic rolled back — PTO system silently failed */
 export const OptimisticRolledBack: Story = {
   args: {
     request: {
       ...baseRequest,
       status: 'rolled_back',
-      ptoError: 'HCM did not confirm this request. Balance has been restored.',
+      ptoError: 'PTO system did not confirm this request. Balance has been restored.',
     },
     onApprove: undefined,
     onDeny: undefined,
   },
 };
 
-/** HCM-rejected with error */
-export const HcmRejected: Story = {
+/** PTO system rejected with error */
+export const PtoRejected: Story = {
   args: {
     request: {
       ...baseRequest,

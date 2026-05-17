@@ -79,9 +79,9 @@ export function RequestCard({
         <p
           role="alert"
           className="mt-2 text-xs text-red-600"
-          data-testid="hcm-error"
+          data-testid="pto-error"
         >
-          HCM: {request.ptoError}
+          PTO: {request.ptoError}
         </p>
       )}
 
