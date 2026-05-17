@@ -1,35 +1,33 @@
 /**
- * Integration tests — EmployeeView with all hooks wired up.
+ * Integration tests — EmployeeClient edge cases.
  *
- * We mock only the HCM API module (the network boundary) so that every layer
- * above it — useEmployeeBalances, useRequests, useSubmitTimeOff, and the page
- * itself — runs exactly as it does in production.
+ * These tests cover scenarios not addressed by the acceptance tests:
+ *   - Multiple balance locations
+ *   - Pre-existing request history
+ *   - Zero-balance state
  *
- * Covered scenarios:
- *  1. Silent failure: HCM returns status:"silent_failure" → warning shown, no success banner.
- *  2. Rollback: HCM throws → balance restored, Pending badge cleared.
- *  3. Happy path: HCM accepts → success banner shown.
+ * Mock boundary: @/app/actions (Server Action layer).
+ * Renders EmployeeClient directly — avoids importing the Server Component page
+ * which pulls in next-auth → next/server ESM resolution issues in Vitest.
  */
 
 import React from 'react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { axe } from 'jest-axe';
-import EmployeeView from '@/app/employee/page';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { EmployeeClient } from '@/components/EmployeeClient';
+import type { Balance, TimeOffRequest } from '@/types';
 
-vi.mock('@/lib/pto-api', () => ({
-  fetchBatchBalances: vi.fn(),
-  fetchBalance: vi.fn(),
-  fetchRequests: vi.fn(),
-  submitTimeOffRequest: vi.fn(),
+vi.mock('@/app/actions', () => ({
+  submitTimeOff: vi.fn(),
 }));
 
-import * as leaveApi from '@/lib/pto-api';
+afterEach(() => {
+  vi.clearAllMocks();
+});
 
 // ── Seed data ──────────────────────────────────────────────────────────────
 
-const seedBalance = {
+const usBalance: Balance = {
   employeeId: 'emp-1',
   locationId: 'loc-us',
   available: 10,
@@ -38,143 +36,95 @@ const seedBalance = {
   asOf: '2026-01-01T00:00:00.000Z',
 };
 
-const seedBatch = {
-  balances: [seedBalance],
-  generatedAt: '2026-01-01T00:00:00.000Z',
+const ukBalance: Balance = {
+  employeeId: 'emp-1',
+  locationId: 'loc-uk',
+  available: 3,
+  used: 2,
+  total: 5,
+  asOf: '2026-01-01T00:00:00.000Z',
 };
 
-// ── Helpers ────────────────────────────────────────────────────────────────
+const approvedRequest: TimeOffRequest = {
+  id: 'r-approved',
+  employeeId: 'emp-1',
+  locationId: 'loc-us',
+  startDate: '2026-07-01',
+  endDate: '2026-07-03',
+  days: 3,
+  reason: 'Holiday',
+  status: 'approved',
+  createdAt: '2026-01-01T00:00:00.000Z',
+  updatedAt: '2026-01-02T00:00:00.000Z',
+};
 
-async function fillAndSubmit(user: ReturnType<typeof userEvent.setup>) {
-  await waitFor(() => expect(screen.getByTestId('time-off-form')).toBeInTheDocument());
-  await user.type(screen.getByLabelText('Start date'), '2026-08-01');
-  await user.type(screen.getByLabelText('End date'), '2026-08-03'); // 3 days
-  await user.click(screen.getByTestId('submit-button'));
-}
+// ── Multiple locations ─────────────────────────────────────────────────────
 
-// ── Setup ──────────────────────────────────────────────────────────────────
-
-beforeEach(() => {
-  vi.mocked(leaveApi.fetchBatchBalances).mockResolvedValue(seedBatch);
-  vi.mocked(leaveApi.fetchBalance).mockResolvedValue(seedBalance);
-  vi.mocked(leaveApi.fetchTimeOffRequests).mockResolvedValue({ requests: [] });
-});
-
-afterEach(() => {
-  vi.clearAllMocks();
-});
-
-// ── Tests ──────────────────────────────────────────────────────────────────
-
-describe('EmployeeView integration: silent failure path', () => {
-  it('shows HCM-unconfirmed warning when submit returns silent_failure', async () => {
-    vi.mocked(leaveApi.submitTimeOffRequest).mockResolvedValue({
-      requestId: 'req-001',
-      status: 'silent_failure',
-    });
-
-    const user = userEvent.setup();
-    render(<EmployeeView />);
-    await fillAndSubmit(user);
-
-    await waitFor(() => {
-      expect(screen.getByTestId('form-error')).toHaveTextContent(
-        'HCM has not confirmed'
-      );
-    });
-
-    // No success banner on silent failure
-    expect(screen.queryByTestId('success-banner')).not.toBeInTheDocument();
-  });
-
-  it('still calls refresh() after silent failure to reconcile with HCM', async () => {
-    vi.mocked(leaveApi.submitTimeOffRequest).mockResolvedValue({
-      requestId: 'req-001',
-      status: 'silent_failure',
-    });
-
-    const user = userEvent.setup();
-    render(<EmployeeView />);
-    await fillAndSubmit(user);
-
-    // fetchBatchBalances is called once on mount, and again via refresh() in finally
-    await waitFor(() => {
-      expect(vi.mocked(leaveApi.fetchBatchBalances)).toHaveBeenCalledTimes(2);
-    });
-  });
-});
-
-describe('EmployeeView integration: rollback on HCM error', () => {
-  it('displays the error message when HCM throws', async () => {
-    vi.mocked(leaveApi.submitTimeOffRequest).mockRejectedValue(
-      new Error('HCM refused the request')
+describe('EmployeeClient: multiple locations', () => {
+  it('renders a BalanceCard for each location', async () => {
+    render(
+      <EmployeeClient
+        employeeId="emp-1"
+        initialBalances={[usBalance, ukBalance]}
+        initialRequests={[]}
+      />
     );
-
-    const user = userEvent.setup();
-    render(<EmployeeView />);
-    await fillAndSubmit(user);
-
-    await waitFor(() => {
-      expect(screen.getByTestId('form-error')).toHaveTextContent(
-        'HCM refused the request'
-      );
-    });
+    const cards = await screen.findAllByTestId('balance-card');
+    expect(cards).toHaveLength(2);
   });
 
-  it('clears the Pending badge after rollback', async () => {
-    vi.mocked(leaveApi.submitTimeOffRequest).mockRejectedValue(
-      new Error('HCM refused')
+  it('location select lists an option for each balance', async () => {
+    render(
+      <EmployeeClient
+        employeeId="emp-1"
+        initialBalances={[usBalance, ukBalance]}
+        initialRequests={[]}
+      />
     );
-
-    const user = userEvent.setup();
-    render(<EmployeeView />);
-    await fillAndSubmit(user);
-
-    await waitFor(() => {
-      expect(screen.queryByText('Pending')).not.toBeInTheDocument();
-    });
-  });
-
-  it('calls refresh() after error to reconcile balance with HCM', async () => {
-    vi.mocked(leaveApi.submitTimeOffRequest).mockRejectedValue(
-      new Error('HCM refused')
-    );
-
-    const user = userEvent.setup();
-    render(<EmployeeView />);
-    await fillAndSubmit(user);
-
-    // fetchBatchBalances: once on mount, once in the finally block
-    await waitFor(() => {
-      expect(vi.mocked(leaveApi.fetchBatchBalances)).toHaveBeenCalledTimes(2);
-    });
+    const options = await screen.findAllByRole('option');
+    expect(options).toHaveLength(2);
   });
 });
 
-describe('EmployeeView integration: happy path', () => {
-  it('shows success banner after accepted submission', async () => {
-    vi.mocked(leaveApi.submitTimeOffRequest).mockResolvedValue({
-      requestId: 'req-002',
-      status: 'accepted',
-    });
+// ── Request history ────────────────────────────────────────────────────────
 
-    const user = userEvent.setup();
-    render(<EmployeeView />);
-    await fillAndSubmit(user);
+describe('EmployeeClient: request history', () => {
+  it('renders pre-existing request cards', () => {
+    render(
+      <EmployeeClient
+        employeeId="emp-1"
+        initialBalances={[usBalance]}
+        initialRequests={[approvedRequest]}
+      />
+    );
+    expect(screen.getByTestId('request-card')).toBeInTheDocument();
+    expect(screen.queryByTestId('empty-requests')).not.toBeInTheDocument();
+  });
 
-    await waitFor(() => {
-      expect(screen.getByTestId('success-banner')).toBeInTheDocument();
-    });
-    expect(screen.queryByTestId('form-error')).not.toBeInTheDocument();
+  it('shows the empty-requests placeholder when there are no requests', () => {
+    render(
+      <EmployeeClient
+        employeeId="emp-1"
+        initialBalances={[usBalance]}
+        initialRequests={[]}
+      />
+    );
+    expect(screen.getByTestId('empty-requests')).toBeInTheDocument();
   });
 });
 
-// ── Accessibility ──────────────────────────────────────────────────────────
+// ── Zero-balance edge case ─────────────────────────────────────────────────
 
-describe('EmployeeView a11y', () => {
-  it('loaded page has no axe violations', async () => {
-    const { container } = render(<EmployeeView />);
-    await waitFor(() => screen.getByTestId('time-off-form'));
-    expect(await axe(container)).toHaveNoViolations();
+describe('EmployeeClient: zero-balance edge case', () => {
+  it('renders a BalanceCard even when available days is zero', () => {
+    const zeroBalance: Balance = { ...usBalance, available: 0 };
+    render(
+      <EmployeeClient
+        employeeId="emp-1"
+        initialBalances={[zeroBalance]}
+        initialRequests={[]}
+      />
+    );
+    expect(screen.getByTestId('balance-card')).toBeInTheDocument();
   });
 });

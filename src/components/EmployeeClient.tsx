@@ -16,6 +16,10 @@ interface Props {
 
 export function EmployeeClient({ employeeId, initialBalances, initialRequests }: Props) {
   const [isPending, startTransition] = useTransition();
+  // Separate from isPending: useTransition's isPending can lag in jsdom test environments
+  // because React 19 async transitions flush differently outside a real browser.
+  // isSubmitting is set synchronously in finally so the Pending badge always clears.
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [optimisticBalances, applyOptimistic] = useOptimistic(
     initialBalances,
     (
@@ -45,6 +49,7 @@ export function EmployeeClient({ employeeId, initialBalances, initialRequests }:
   }) {
     setSubmitError(null);
     setSuccessMsg(null);
+    setIsSubmitting(true);
 
     startTransition(async () => {
       applyOptimistic({ locationId: payload.locationId, days: payload.days });
@@ -64,6 +69,8 @@ export function EmployeeClient({ employeeId, initialBalances, initialRequests }:
         setSubmitError(
           err instanceof Error ? err.message : "Submission failed. Please try again."
         );
+      } finally {
+        setIsSubmitting(false);
       }
     });
   }
@@ -80,7 +87,7 @@ export function EmployeeClient({ employeeId, initialBalances, initialRequests }:
             <BalanceCard
               key={`${b.employeeId}-${b.locationId}`}
               balance={b}
-              isOptimistic={isPending}
+              isOptimistic={isSubmitting}
             />
           ))}
         </div>
@@ -98,7 +105,7 @@ export function EmployeeClient({ employeeId, initialBalances, initialRequests }:
             employeeId={employeeId}
             balances={optimisticBalances}
             onSubmit={handleSubmit}
-            isSubmitting={isPending}
+            isSubmitting={isSubmitting}
             error={submitError}
           />
         )}
