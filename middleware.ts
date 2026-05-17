@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+import { auth, getSessionUser } from "@/auth";
 import { NextResponse } from "next/server";
 
 export default auth((req) => {
@@ -9,7 +9,7 @@ export default auth((req) => {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  const role = session.user.role;
+  const { role } = getSessionUser(session);
 
   if (pathname.startsWith("/employee") && role !== "employee") {
     return NextResponse.redirect(new URL("/manager", req.url));
