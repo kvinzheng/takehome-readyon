@@ -27,7 +27,7 @@ export default async function ManagerPage() {
       <header className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Pending Approvals</h1>
         <p className="text-sm text-gray-500">
-          {session.user!.name} · Manager — balances shown are live PTO system reads
+          {user.name} · Manager — balances shown are live PTO system reads
         </p>
       </header>
       <ManagerClient requestsWithBalances={requestsWithBalances} />
