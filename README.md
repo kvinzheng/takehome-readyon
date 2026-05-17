@@ -79,7 +79,8 @@ RootLayout
 
 | Layer | Files | Responsibility |
 |---|---|---|
-| **Route handlers** | `src/app/api/pto/*/route.ts` | Mock PTO system — all mutable state lives here |
+| **Route handlers** | `src/app/route/pto/*/route.ts` | Thin HTTP wrappers — parse request, call handler, serialize response |
+| **Handlers** | `src/route/pto/*.ts` | Pure handler functions — all business logic, typed errors, fully unit-testable |
 | **Store** | `src/lib/pto-store.ts` | In-process singleton — balance deduction, anniversary, request state |
 | **DAL** | `src/lib/pto-dal.ts` | Typed wrappers over the store with simulated latency |
 | **Server Actions** | `src/app/actions.ts` | Auth-gated mutations — `submitTimeOff`, `approveTimeOff`, `denyTimeOff`, `login`, `logout` |
@@ -97,7 +98,7 @@ Employee logs in
   → EmployeePage (Server) checks isWorkAnniversary()
   → grantAnniversaryBonus() mutates store
   → emitBalanceUpdate() fires on SSE bus
-      → GET /api/pto/events pushes frame to every open tab
+      → GET /route/pto/events pushes frame to every open tab
           → useSSESync() receives "balance-update"
               → router.refresh() re-renders Server Component
                   → BalanceCard shows +5 days
@@ -116,8 +117,8 @@ Other open tabs: receive the SSE push and refresh automatically
 ### Auth
 
 NextAuth v5 with a JWT strategy. The `role` claim (`employee` | `manager`) is embedded in the token and enforced in:
-- `middleware.ts` — redirects at the edge before any page renders
-- Each `page.tsx` — secondary guard with typed `getSessionUser()` helper
+- `proxy.ts` — edge middleware that redirects unauthenticated and wrong-role requests before any page renders
+- Each `page.tsx` — secondary guard with typed `getSessionUser()` helper; `/login` redirects authenticated users to their role-based page
 - Each Server Action — re-validates before any mutation
 
 **Accessing session data:**
@@ -146,8 +147,8 @@ Next.js caches RSC payloads client-side for the session. Employee → Manager �
 src/
   app/
     actions.ts            # Server Actions (auth-gated mutations)
-    providers.tsx          # SessionProvider — global client state root
-    api/pto/              # Mock PTO route handlers
+    providers.tsx         # SessionProvider — global client state root
+    route/pto/            # Thin Next.js route handlers (HTTP in/out only)
       balance/            # GET  single balance
       balances/batch/     # GET  all balances
       employees/          # GET  employee list
@@ -157,7 +158,17 @@ src/
       anniversary-bonus/  # POST test harness: trigger bonus manually
     employee/page.tsx     # Server Component — anniversary check + data fetch
     manager/page.tsx      # Server Component — pending requests + live balances
-    login/page.tsx        # Login page
+    login/page.tsx        # Login page — redirects authenticated users by role
+  route/pto/              # Pure handler functions (business logic, typed errors)
+    errors.ts             # ApiError subclasses (ValidationError, NotFoundError, …)
+    utils.ts              # handleRoute() — uniform error serialization
+    balance.ts
+    balances-batch.ts
+    employees.ts
+    requests.ts
+    requests-id.ts
+    anniversary-bonus.ts
+    events.ts             # createEventsStream() — SSE stream factory
   components/
     employee/             # BalanceCard, TimeOffForm, EmployeeClient
     manager/              # ManagerClient
@@ -171,7 +182,7 @@ src/
     pto-api.ts            # Client-side fetch helpers (test harness)
     sse-bus.ts            # EventEmitter pub/sub for SSE
   tests/
-    unit/                 # pto-store pure logic
+    unit/                 # pto-store pure logic + api-handlers (24 tests)
     components/           # BalanceCard, RequestCard, TimeOffForm
     integration/          # employee-view, manager-view, request-lifecycle, time-off-submission
     acceptance/           # Per-route AC: optimistic updates, rollback, silent failures, a11y
@@ -181,11 +192,11 @@ src/
 
 | Endpoint | Method | Description |
 |---|---|---|
-| `/api/pto/balance` | GET | Real-time single-cell balance |
-| `/api/pto/balances/batch` | GET | Full balance corpus |
-| `/api/pto/requests` | GET, POST | List / submit requests |
-| `/api/pto/requests/:id` | GET, PATCH | Fetch / approve / deny |
-| `/api/pto/events` | GET | SSE stream — balance-update push |
-| `/api/pto/anniversary-bonus` | POST | Test harness: trigger bonus manually |
-| `/api/pto/employees` | GET | List employees |
+| `/route/pto/balance` | GET | Real-time single-cell balance |
+| `/route/pto/balances/batch` | GET | Full balance corpus |
+| `/route/pto/requests` | GET, POST | List / submit requests |
+| `/route/pto/requests/:id` | GET, PATCH | Fetch / approve / deny |
+| `/route/pto/events` | GET | SSE stream — balance-update push |
+| `/route/pto/anniversary-bonus` | POST | Test harness: trigger bonus manually |
+| `/route/pto/employees` | GET | List employees |
 

@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 /**
- * Opens a persistent SSE connection to /api/pto/events and calls
+ * Opens a persistent SSE connection to /route/pto/events and calls
  * router.refresh() whenever a "balance-update" frame arrives.
  *
  * This is how the anniversary bonus (and any future server-side balance
