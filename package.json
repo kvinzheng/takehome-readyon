@@ -12,8 +12,7 @@
     "test": "vitest run --project unit",
     "test:storybook": "vitest run --project storybook",
     "test:all": "vitest run",
-    "test:e2e": "playwright test",
-    "test:integration": "vitest run --project unit --reporter=verbose src/tests/integration.test.tsx"
+    "test:integration": "vitest run --project unit --reporter=verbose src/tests/integration/"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.100.10",
