@@ -88,13 +88,13 @@ describe('RequestCard', () => {
     expect(screen.queryByTestId('approve-btn')).not.toBeInTheDocument();
   });
 
-  it('shows HCM error when present', () => {
+  it('shows PTO error when present', () => {
     render(
       <RequestCard
         request={{ ...base, ptoError: 'Silent failure detected' }}
       />
     );
-    expect(screen.getByTestId('hcm-error')).toBeInTheDocument();
+    expect(screen.getByTestId('pto-error')).toBeInTheDocument();
   });
 
   it('disables buttons when isActing', () => {

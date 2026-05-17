@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { grantAnniversaryBonus, EMPLOYEES, LOCATIONS } from "@/lib/pto-store";
 
 /**
- * POST /api/hcm/anniversary-bonus
+ * POST /api/pto/anniversary-bonus
  * Body: { employeeId: string; locationId: string }
  *
- * Simulates a background HCM event (work anniversary, year-start refresh).
- * This is meant to be triggered from the UI test harness or Storybook to
- * prove the reconciliation path works.
+ * Simulates a background PTO system event (work anniversary, year-start refresh).
+ * After mutating the store, revalidates the employee page so the next server
+ * render reflects the updated balance — no client-side polling required.
  */
 export async function POST(req: NextRequest) {
   const { employeeId, locationId } = await req.json();
@@ -30,6 +31,10 @@ export async function POST(req: NextRequest) {
       { status: 200 }
     );
   }
+
+  // Invalidate the server cache so the next page render reflects the new balance.
+  // The employee will see updated data on their next router.refresh() or navigation.
+  revalidatePath("/employee");
 
   return NextResponse.json({
     message: "Anniversary bonus of +5 days granted",
