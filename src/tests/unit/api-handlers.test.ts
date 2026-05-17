@@ -1,17 +1,17 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { resetStore } from "@/lib/pto-store";
-import { getBalanceHandler } from "@/api/pto/balance";
-import { getBatchBalancesHandler } from "@/api/pto/balances-batch";
-import { getEmployeesHandler } from "@/api/pto/employees";
-import { submitRequestHandler, getRequestsHandler } from "@/api/pto/requests";
-import { updateRequestHandler, getRequestByIdHandler } from "@/api/pto/requests-id";
-import { grantAnniversaryBonusHandler } from "@/api/pto/anniversary-bonus";
+import { getBalanceHandler } from "@/route/pto/balance";
+import { getBatchBalancesHandler } from "@/route/pto/balances-batch";
+import { getEmployeesHandler } from "@/route/pto/employees";
+import { submitRequestHandler, getRequestsHandler } from "@/route/pto/requests";
+import { updateRequestHandler, getRequestByIdHandler } from "@/route/pto/requests-id";
+import { grantAnniversaryBonusHandler } from "@/route/pto/anniversary-bonus";
 import {
   ValidationError,
   NotFoundError,
   ConflictError,
   InsufficientBalanceError,
-} from "@/api/pto/errors";
+} from "@/route/pto/errors";
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("@/lib/sse-bus", () => ({ emitBalanceUpdate: vi.fn(), onBalanceUpdate: vi.fn() }));

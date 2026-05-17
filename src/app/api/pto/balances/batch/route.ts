@@ -1,5 +1,5 @@
-import { getBatchBalancesHandler } from "@/api/pto/balances-batch";
-import { handleRoute } from "@/api/pto/utils";
+import { getBatchBalancesHandler } from "@/route/pto/balances-batch";
+import { handleRoute } from "@/route/pto/utils";
 
 /** GET /api/pto/balances/batch */
 export async function GET() {

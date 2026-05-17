@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
-import { updateRequestHandler, getRequestByIdHandler } from "@/api/pto/requests-id";
-import { handleRoute } from "@/api/pto/utils";
+import { updateRequestHandler, getRequestByIdHandler } from "@/route/pto/requests-id";
+import { handleRoute } from "@/route/pto/utils";
 
 /** PATCH /api/pto/requests/:id — Body: { action: "approve" | "deny" } */
 export async function PATCH(

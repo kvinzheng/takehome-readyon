@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { createEventsStream } from "@/api/pto/events";
+import { createEventsStream } from "@/route/pto/events";
 
 export const dynamic = "force-dynamic";
 

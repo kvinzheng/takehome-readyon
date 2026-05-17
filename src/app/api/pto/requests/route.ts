@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
-import { submitRequestHandler, getRequestsHandler } from "@/api/pto/requests";
-import { handleRoute } from "@/api/pto/utils";
+import { submitRequestHandler, getRequestsHandler } from "@/route/pto/requests";
+import { handleRoute } from "@/route/pto/utils";
 
 /** POST /api/pto/requests — submit a time-off request */
 export async function POST(req: NextRequest) {
