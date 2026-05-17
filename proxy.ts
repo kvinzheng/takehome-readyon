@@ -21,5 +21,5 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/employee/:path*", "/manager/:path*"],
+  matcher: ["/employee", "/manager"],
 };

@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
-import { EMPLOYEES, LOCATIONS } from "@/lib/pto-store";
+import { getEmployeesHandler } from "@/api/pto/employees";
+import { handleRoute } from "@/api/pto/utils";
 
-/** GET /api/hcm/employees — list all employees for the demo */
+/** GET /api/pto/employees */
 export async function GET() {
-  return NextResponse.json({ employees: EMPLOYEES });
+  return handleRoute(() => Promise.resolve(getEmployeesHandler()));
 }
