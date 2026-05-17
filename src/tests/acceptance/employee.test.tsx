@@ -37,7 +37,6 @@ const seedBalance: Balance = {
 };
 
 const defaultProps = {
-  employeeId: 'emp-1',
   initialBalances: [seedBalance],
   initialRequests: [] as TimeOffRequest[],
 };

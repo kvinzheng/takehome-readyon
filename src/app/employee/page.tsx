@@ -42,7 +42,6 @@ export default async function EmployeePage() {
         </p>
       </header>
       <EmployeeClient
-        employeeId={user.id}
         initialBalances={balances}
         initialRequests={requests}
       />

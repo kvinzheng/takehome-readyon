@@ -7,19 +7,20 @@ import { RequestCard } from "../shared/RequestCard";
 import { SuccessBanner, ErrorBanner } from "../shared/StatusBanners";
 import { useTimeOffSubmit } from "@/hooks/use-time-off-submit";
 import { useSSESync } from "@/hooks/use-sse-sync";
+import { useAuth } from "@/hooks/use-auth";
 import type { Balance, TimeOffRequest } from "@/types";
 
 interface Props {
-  employeeId: string;
   initialBalances: Balance[];
   initialRequests: TimeOffRequest[];
 }
 
-export function EmployeeClient({ employeeId, initialBalances, initialRequests }: Props) {
+export function EmployeeClient({ initialBalances, initialRequests }: Props) {
   useSSESync();
+  const { user } = useAuth();
 
   const { optimisticBalances, isSubmitting, successMsg, submitError, handleSubmit } =
-    useTimeOffSubmit(employeeId, initialBalances);
+    useTimeOffSubmit(user?.id ?? "", initialBalances);
 
   return (
     <>

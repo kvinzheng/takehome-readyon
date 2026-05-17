@@ -64,7 +64,6 @@ describe('EmployeeClient: multiple locations', () => {
   it('renders a BalanceCard for each location', async () => {
     render(
       <EmployeeClient
-        employeeId="emp-1"
         initialBalances={[usBalance, ukBalance]}
         initialRequests={[]}
       />
@@ -76,7 +75,6 @@ describe('EmployeeClient: multiple locations', () => {
   it('location select lists an option for each balance', async () => {
     render(
       <EmployeeClient
-        employeeId="emp-1"
         initialBalances={[usBalance, ukBalance]}
         initialRequests={[]}
       />
@@ -92,7 +90,6 @@ describe('EmployeeClient: request history', () => {
   it('renders pre-existing request cards', () => {
     render(
       <EmployeeClient
-        employeeId="emp-1"
         initialBalances={[usBalance]}
         initialRequests={[approvedRequest]}
       />
@@ -104,7 +101,6 @@ describe('EmployeeClient: request history', () => {
   it('shows the empty-requests placeholder when there are no requests', () => {
     render(
       <EmployeeClient
-        employeeId="emp-1"
         initialBalances={[usBalance]}
         initialRequests={[]}
       />
@@ -120,7 +116,6 @@ describe('EmployeeClient: zero-balance edge case', () => {
     const zeroBalance: Balance = { ...usBalance, available: 0 };
     render(
       <EmployeeClient
-        employeeId="emp-1"
         initialBalances={[zeroBalance]}
         initialRequests={[]}
       />
