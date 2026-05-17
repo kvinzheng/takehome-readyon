@@ -2,7 +2,7 @@ import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { axe } from 'jest-axe';
-import { BalanceCard } from '@/components/BalanceCard';
+import { BalanceCard } from '@/components/employee/BalanceCard';
 
 const balance = {
   employeeId: 'emp-1',

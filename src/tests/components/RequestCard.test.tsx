@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { axe } from 'jest-axe';
-import { RequestCard } from '@/components/RequestCard';
+import { RequestCard } from '@/components/shared/RequestCard';
 import type { TimeOffRequest } from '@/types';
 
 const base: TimeOffRequest = {

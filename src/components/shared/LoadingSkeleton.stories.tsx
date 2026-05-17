@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { expect, within } from '@storybook/test';
-import { LoadingSkeleton } from '@/components/StatusBanners';
+import { LoadingSkeleton } from './StatusBanners';
 
 const meta: Meta<typeof LoadingSkeleton> = {
   title: 'Components/StatusBanners/LoadingSkeleton',

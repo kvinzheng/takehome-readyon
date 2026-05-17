@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import { LoginForm } from '@/components/LoginForm';
+import { LoginForm } from './LoginForm';
 
 /**
  * LoginForm hard-wires useActionState(login, null) so it can't accept

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { fn } from '@storybook/test';
-import { StaleWarning } from '@/components/StatusBanners';
+import { StaleWarning } from './StatusBanners';
 
 const meta: Meta<typeof StaleWarning> = {
   title: 'Components/StatusBanners/StaleWarning',

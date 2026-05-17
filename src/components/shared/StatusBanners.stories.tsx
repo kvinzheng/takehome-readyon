@@ -5,7 +5,7 @@ import {
   StaleWarning,
   SuccessBanner,
   LoadingSkeleton,
-} from '@/components/StatusBanners';
+} from './StatusBanners';
 
 // ── ErrorBanner ───────────────────────────────────────────────────────────────
 

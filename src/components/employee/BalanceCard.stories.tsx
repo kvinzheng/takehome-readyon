@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import { BalanceCard } from '@/components/BalanceCard';
+import { BalanceCard } from './BalanceCard';
 
 const baseBalance = {
   employeeId: 'emp-1',

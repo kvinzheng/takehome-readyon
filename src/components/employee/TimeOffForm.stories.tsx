@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { fn, expect, userEvent, within } from '@storybook/test';
-import { TimeOffForm } from '@/components/TimeOffForm';
+import { TimeOffForm } from './TimeOffForm';
 
 const balances = [
   {

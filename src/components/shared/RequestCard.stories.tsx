@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { fn } from '@storybook/test';
-import { RequestCard } from '@/components/RequestCard';
+import { RequestCard } from './RequestCard';
 import type { TimeOffRequest } from '@/types';
 
 const baseRequest: TimeOffRequest = {

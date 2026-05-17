@@ -143,6 +143,15 @@ export function restoreBalance(
   });
 }
 
+/** Returns true if today is the employee's work anniversary (month+day match). */
+export function isWorkAnniversary(employeeId: string): boolean {
+  const employee = EMPLOYEES.find((e) => e.id === employeeId);
+  if (!employee) return false;
+  const hire = new Date(employee.hireDate);
+  const today = new Date();
+  return hire.getMonth() === today.getMonth() && hire.getDate() === today.getDate();
+}
+
 /** Fire a work-anniversary bonus (+5 days) for an employee+location pair */
 export function grantAnniversaryBonus(
   employeeId: string,

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useTransition } from "react";
-import { RequestCard } from "./RequestCard";
+import { RequestCard } from "../shared/RequestCard";
 import { approveTimeOff, denyTimeOff } from "@/app/actions";
 import type { Balance, TimeOffRequest } from "@/types";
 

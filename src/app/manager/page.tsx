@@ -1,7 +1,7 @@
 import { auth, getSessionUser } from "@/auth";
 import { redirect } from "next/navigation";
 import { dalGetPendingRequests, dalGetBalance } from "@/lib/pto-dal";
-import { ManagerClient } from "@/components/ManagerClient";
+import { ManagerClient } from "@/components/manager/ManagerClient";
 
 export default async function ManagerPage() {
   const session = await auth();

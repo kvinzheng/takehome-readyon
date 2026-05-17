@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import { SuccessBanner } from '@/components/StatusBanners';
+import { SuccessBanner } from './StatusBanners';
 
 const meta: Meta<typeof SuccessBanner> = {
   title: 'Components/StatusBanners/SuccessBanner',

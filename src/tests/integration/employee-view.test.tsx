@@ -14,7 +14,7 @@
 import React from 'react';
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { EmployeeClient } from '@/components/EmployeeClient';
+import { EmployeeClient } from '@/components/employee/EmployeeClient';
 import type { Balance, TimeOffRequest } from '@/types';
 
 vi.mock('@/app/actions', () => ({

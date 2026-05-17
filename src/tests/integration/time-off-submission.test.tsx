@@ -3,15 +3,15 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { axe } from 'jest-axe';
-import { TimeOffForm } from '@/components/TimeOffForm';
-import { BalanceCard } from '@/components/BalanceCard';
+import { TimeOffForm } from '@/components/employee/TimeOffForm';
+import { BalanceCard } from '@/components/employee/BalanceCard';
 import type { TimeOffSubmissionResponse } from '@/types';
 import {
   ErrorBanner,
   SuccessBanner,
   StaleWarning,
   LoadingSkeleton,
-} from '@/components/StatusBanners';
+} from '@/components/shared/StatusBanners';
 
 /**
  * Integration test: optimistic update flow.

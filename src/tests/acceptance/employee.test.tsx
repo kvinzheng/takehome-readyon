@@ -16,7 +16,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { axe } from 'jest-axe';
-import { EmployeeClient } from '@/components/EmployeeClient';
+import { EmployeeClient } from '@/components/employee/EmployeeClient';
 import type { Balance, TimeOffRequest } from '@/types';
 
 vi.mock('@/app/actions', () => ({

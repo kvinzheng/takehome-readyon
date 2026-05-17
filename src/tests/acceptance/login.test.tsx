@@ -15,7 +15,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { axe } from 'jest-axe';
-import { LoginForm } from '@/components/LoginForm';
+import { LoginForm } from '@/components/shared/LoginForm';
 
 vi.mock('@/app/actions', () => ({
   login: vi.fn(),
