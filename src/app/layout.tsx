@@ -3,6 +3,7 @@ import { Geist } from "next/font/google";
 import "./globals.css";
 import { auth, getSessionUser } from "@/auth";
 import { logout } from "@/app/actions";
+import { Providers } from "@/app/providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,6 +26,7 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`${geistSans.variable} h-full antialiased`}>
       <body className="min-h-full bg-gray-50 flex flex-col">
+        <Providers session={session}>
         <nav className="border-b border-gray-200 bg-white">
           <div className="mx-auto flex max-w-2xl items-center gap-4 px-4 py-3">
             <span className="font-bold text-indigo-600">ReadyOn</span>
@@ -45,6 +47,7 @@ export default async function RootLayout({
           </div>
         </nav>
         {children}
+        </Providers>
       </body>
     </html>
   );
