@@ -1,5 +1,3 @@
-Test it with 2 window 
-<img width="1710" height="992" alt="Screenshot 2026-05-17 at 8 26 19 PM" src="https://github.com/user-attachments/assets/1a55a65a-82d6-4167-b1b1-02d4acf37e31" />
 
 
 
@@ -59,6 +57,9 @@ node scripts/measure-lcp.mjs   # Capture LCP/FCP/TTFB against a running prod bui
 The most interesting thing about this app is that **changes propagate across browser tabs in real time** — submit a request in one window, watch the manager's queue update in another, all without polling or page refreshes. To see this you need two independent sessions (one regular window + one incognito):
 
 ![Two-window setup: regular Chrome on the left as Carol (manager), incognito on the right as Alice (employee). Submitting a request on the right adds a card on the left instantly.](docs/two-window-setup.png)
+
+<img width="1710" height="992" alt="Screenshot 2026-05-17 at 8 26 19 PM" src="https://github.com/user-attachments/assets/1a55a65a-82d6-4167-b1b1-02d4acf37e31" />
+
 
 > ⚠️ **Use two different browser sessions, not two tabs.** NextAuth stores the session cookie per browser profile — if you open Alice and Carol in two regular tabs they'll clobber each other's session. Use one regular window + one incognito window (⌘⇧N on macOS / Ctrl⇧N on Windows) so each side has its own cookie jar.
 
