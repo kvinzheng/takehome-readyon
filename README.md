@@ -95,7 +95,19 @@ The most interesting thing about this app is that **changes propagate across bro
    Submit another request in Window A, then deny it from Window B.
    → Window A: the request flips to **Denied** and the US balance restores (the days come back).
 
-If any of those steps require a manual refresh, the SSE pipeline is broken — open DevTools → Network → filter "events" and confirm `GET /route/pto/events` is open with `type: eventsource` and a never-ending response.
+8. **Test #5 — optimistic UI on submit**
+   In Window A submit a request and watch the form button: it disables immediately and the new card appears in "My Requests" *before* the server round-trip finishes (powered by `useOptimistic`). If the server later rejects, the optimistic row is rolled back and an inline error banner is shown.
+
+9. **Test #6 — over-balance guard**
+   In Window A pick a date range longer than the US balance (e.g. 9 days when 6 are available). The form shows a red **"N days selected — exceeds available balance"** hint and the submit button stays disabled. The check is client-side for instant feedback *and* re-validated server-side in `submitTimeOff()` — so it can't be bypassed via DevTools.
+
+10. **Test #7 — role-based access**
+    In Window A (Alice / employee) try to visit http://localhost:3000/manager — you should be redirected to `/employee`. The same redirect happens in reverse if Carol visits `/employee`. Auth checks live in the page Server Components (`src/app/manager/page.tsx`, `src/app/employee/page.tsx`) and are also covered by `src/tests/e2e/role-based-access.spec.ts`.
+
+11. **Test #8 — SSE reconnect (resilience)**
+    With both windows open and signed in, kill the dev server (`Ctrl-C` in the terminal) then restart it (`npm run dev`). Within ~3 seconds the browser's `EventSource` reconnects automatically — submit a request in Window A and confirm Window B still updates live without a manual reload. The reconnection logic is built into `EventSource` itself; we just don't fight it.
+
+If any of those steps require a manual refresh, the SSE pipeline is broken — open DevTools → **Network** → filter "events" and confirm `GET /route/pto/events` is open with `type: eventsource` and a never-ending response. In the **Console** you should also see one `[sse] pto-update …` log per cross-window action.
 
 ---
 
