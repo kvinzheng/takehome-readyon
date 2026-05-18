@@ -41,7 +41,7 @@ npm run storybook    # http://localhost:6006  (optional)
 ## Testing
 
 ```bash
-npm test                   # 74 vitest tests: unit + component + integration + acceptance
+npm test                   # 74 vitest tests: unit + component + integration
 npm run test:all           # Above + Storybook interaction tests
 npm run test:e2e           # 3 Playwright specs (role access, approval flow, anniversary SSE)
 node scripts/measure-lcp.mjs   # Capture LCP/FCP/TTFB against a running prod build
@@ -402,8 +402,7 @@ src/
     unit/                       # Pure logic (pto-store)
     components/                 # Render states + a11y (jest-axe)
     integration/                # *Client wired against mocked actions + a11y
-    acceptance/                 # Given/When/Then per requirement + a11y
-    e2e/                        # Playwright: role access, approval, anniversary SSE
+    e2e/                        # Playwright acceptance flows: role access, approval, anniversary SSE
 scripts/
   measure-lcp.mjs               # Playwright + PerformanceObserver perf harness
 ```
@@ -417,8 +416,7 @@ scripts/
 | Unit | `tests/unit/pto-store.test.ts` | Deduction / restore / anniversary idempotency |
 | Component | `tests/components/*.test.tsx` | Each component's render states + WCAG via `jest-axe` |
 | Integration | `tests/integration/*.test.tsx` | `EmployeeClient` / `ManagerClient` against mocked actions; optimistic + reconcile flow + a11y |
-| Acceptance | `tests/acceptance/*.test.tsx` | Brief framed as G/W/T per role |
-| E2E | `tests/e2e/*.spec.ts` | Cross-tab SSE, edge auth, full approval flow (Playwright) |
+| Acceptance (E2E) | `tests/e2e/*.spec.ts` | Per-requirement business flows in real Chromium (Playwright): role-based access, full approval lifecycle, anniversary SSE |
 
 **74 vitest tests + 3 Playwright specs, all green.** Accessibility is asserted at every layer.
 
