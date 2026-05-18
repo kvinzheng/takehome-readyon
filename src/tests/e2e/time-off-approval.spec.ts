@@ -1,7 +1,11 @@
 import { test, expect } from "@playwright/test";
 
 /**
- * E2E smoke — cross-role lifecycle.
+ * Business flow — Time-off request approval.
+ *
+ * Use case:
+ *   An employee submits a time-off request. Their manager, working in a
+ *   separate session, sees it in the pending queue and approves it.
  *
  * Notes:
  *  - The dev server's in-memory store is shared across browser contexts in
@@ -10,8 +14,8 @@ import { test, expect } from "@playwright/test";
  *  - We DO NOT clear the store between tests — Playwright is configured with
  *    a single worker and these tests run sequentially against a fresh dev
  *    server boot. Re-running locally without restarting the dev server is
- *    expected to leave stale requests in the queue, which is fine for a
- *    smoke test (we filter by a per-run reason string).
+ *    expected to leave stale requests in the queue, which is fine here
+ *    because we filter by a per-run reason string.
  */
 
 const RUN_TAG = `e2e-${Date.now()}`;

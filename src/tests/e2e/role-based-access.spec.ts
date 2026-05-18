@@ -1,13 +1,18 @@
 import { test, expect, type Page } from "@playwright/test";
 
 /**
- * E2E — route × auth-state matrix.
+ * Business flow — Role-based access control.
  *
- * Every protected route is checked in three states (unauth, employee, manager).
- * These flows exercise:
- *   - src/app/page.tsx        — root role-based redirect
- *   - proxy.ts                — middleware guard for /employee and /manager
- *   - /login                  — already-signed-in bounce in LoginForm/route
+ * Use case:
+ *   Only signed-in users can reach the app; employees and managers each
+ *   land on (and are confined to) their own dashboard. Visiting the wrong
+ *   route bounces the user to the right one.
+ *
+ * Every route is exercised in three auth states (unauth, employee, manager),
+ * covering:
+ *   - src/app/page.tsx  — root role-based redirect
+ *   - proxy.ts          — middleware guard for /employee and /manager
+ *   - /login            — already-signed-in bounce
  */
 
 const EMPLOYEE = { email: "alice@readyon.com", password: "alice123" };
