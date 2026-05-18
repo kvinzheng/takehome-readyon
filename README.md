@@ -1,3 +1,8 @@
+Test it with 2 window 
+<img width="1710" height="992" alt="Screenshot 2026-05-17 at 8 26 19 PM" src="https://github.com/user-attachments/assets/1a55a65a-82d6-4167-b1b1-02d4acf37e31" />
+
+
+
 # ReadyOn Time-Off
 
 A time-off request app built to solve the data-integrity problems that appear when **your UI doesn't own the source of truth**. Balances live in an external PTO system (Workday-class); ReadyOn is the front-end that has to stay fast *and* honest about whose data it's showing.
