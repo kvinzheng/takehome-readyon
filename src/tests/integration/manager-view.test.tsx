@@ -97,6 +97,21 @@ describe('ManagerClient: request list', () => {
       expect(denyTimeOff).toHaveBeenCalledWith('req-001')
     );
   });
+
+  it('surfaces an action-error banner when approveTimeOff rejects', async () => {
+    vi.mocked(approveTimeOff).mockRejectedValue(new Error('HCM unreachable'));
+    const user = userEvent.setup();
+    render(
+      <ManagerClient
+        requestsWithBalances={[{ request: pendingRequest, balance }]}
+      />
+    );
+    await user.click(screen.getByTestId('approve-btn'));
+    await waitFor(() => {
+      const alert = screen.getByTestId('action-error');
+      expect(alert).toHaveTextContent('HCM unreachable');
+    });
+  });
 });
 
 // ── Accessibility ──────────────────────────────────────────────────────────
