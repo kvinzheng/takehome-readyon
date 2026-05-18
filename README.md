@@ -43,7 +43,7 @@ npm run storybook    # http://localhost:6006  (optional)
 ```bash
 npm test                   # 74 vitest tests: unit + component + integration
 npm run test:all           # Above + Storybook interaction tests
-npm run test:e2e           # 3 Playwright specs (role access, approval flow, anniversary SSE)
+npm run test:acceptance    # 3 Playwright specs (role access, approval flow, anniversary SSE)
 node scripts/measure-lcp.mjs   # Capture LCP/FCP/TTFB against a running prod build
 ```
 
@@ -99,7 +99,7 @@ The most interesting thing about this app is that **changes propagate across bro
    In Window A pick a date range longer than the US balance (e.g. 9 days when 6 are available). The form shows a red **"N days selected — exceeds available balance"** hint and the submit button stays disabled. The check is client-side for instant feedback *and* re-validated server-side in `submitTimeOff()` — so it can't be bypassed via DevTools.
 
 10. **Test #7 — role-based access**
-    In Window A (Alice / employee) try to visit http://localhost:3000/manager — you should be redirected to `/employee`. The same redirect happens in reverse if Carol visits `/employee`. Auth checks live in the page Server Components (`src/app/manager/page.tsx`, `src/app/employee/page.tsx`) and are also covered by `src/tests/e2e/role-based-access.spec.ts`.
+    In Window A (Alice / employee) try to visit http://localhost:3000/manager — you should be redirected to `/employee`. The same redirect happens in reverse if Carol visits `/employee`. Auth checks live in the page Server Components (`src/app/manager/page.tsx`, `src/app/employee/page.tsx`) and are also covered by `src/tests/acceptance/role-based-access.spec.ts`.
 
 11. **Test #8 — SSE reconnect (resilience)**
     With both windows open and signed in, kill the dev server (`Ctrl-C` in the terminal) then restart it (`npm run dev`). Within ~3 seconds the browser's `EventSource` reconnects automatically — submit a request in Window A and confirm Window B still updates live without a manual reload. The reconnection logic is built into `EventSource` itself; we just don't fight it.
@@ -402,7 +402,7 @@ src/
     unit/                       # Pure logic (pto-store)
     components/                 # Render states + a11y (jest-axe)
     integration/                # *Client wired against mocked actions + a11y
-    e2e/                        # Playwright acceptance flows: role access, approval, anniversary SSE
+    acceptance/                 # Playwright acceptance flows: role access, approval, anniversary SSE
 scripts/
   measure-lcp.mjs               # Playwright + PerformanceObserver perf harness
 ```
@@ -416,7 +416,7 @@ scripts/
 | Unit | `tests/unit/pto-store.test.ts` | Deduction / restore / anniversary idempotency |
 | Component | `tests/components/*.test.tsx` | Each component's render states + WCAG via `jest-axe` |
 | Integration | `tests/integration/*.test.tsx` | `EmployeeClient` / `ManagerClient` against mocked actions; optimistic + reconcile flow + a11y |
-| Acceptance (E2E) | `tests/e2e/*.spec.ts` | Per-requirement business flows in real Chromium (Playwright): role-based access, full approval lifecycle, anniversary SSE |
+| Acceptance | `tests/acceptance/*.spec.ts` | Per-requirement business flows in real Chromium (Playwright): role-based access, full approval lifecycle, anniversary SSE |
 
 **74 vitest tests + 3 Playwright specs, all green.** Accessibility is asserted at every layer.
 

@@ -135,9 +135,9 @@ Each requirement above maps to at least one test in `src/tests/`. See [README.md
 - `acceptance/manager.test.tsx` — covers F3, F4 (manual grant), F7
 - `acceptance/login.test.tsx` — covers F1, F7
 - `integration/request-lifecycle.test.ts` — full submit → approve flow against the real store
-- `e2e/anniversary-bonus.spec.ts` — cross-tab SSE propagation (G3)
-- `e2e/role-based-access.spec.ts` — F7 at the edge
-- `e2e/time-off-approval.spec.ts` — F3 + F5
+- `acceptance/anniversary-bonus.spec.ts` — cross-tab SSE propagation (G3)
+- `acceptance/role-based-access.spec.ts` — F7 at the edge
+- `acceptance/time-off-approval.spec.ts` — F3 + F5
 
 ---
 

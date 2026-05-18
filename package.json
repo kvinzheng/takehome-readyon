@@ -13,7 +13,7 @@
     "test:storybook": "vitest run --project storybook",
     "test:all": "vitest run",
     "test:integration": "vitest run --project unit --reporter=verbose src/tests/integration/",
-    "test:e2e": "playwright test"
+    "test:acceptance": "playwright test"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.100.10",
