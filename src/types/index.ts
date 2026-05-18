@@ -85,6 +85,7 @@ export interface TimeOffSubmissionResponse {
 /** Response from PATCH /api/hcm/requests/:id */
 export interface ApprovalResponse {
   requestId: string;
+  employeeId: string;
   status: "approved" | "denied";
   balance?: BalanceApiResponse;
 }

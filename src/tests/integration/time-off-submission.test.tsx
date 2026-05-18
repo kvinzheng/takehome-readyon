@@ -23,14 +23,6 @@ import {
  *  3. On HCM failure, the balance rolls back to its pre-submit value.
  */
 
-vi.mock('@/lib/pto-api', () => ({
-  submitTimeOffRequest: vi.fn(),
-  fetchBatchBalances: vi.fn(),
-  fetchRequests: vi.fn(() => Promise.resolve({ requests: [] })),
-}));
-
-import * as leaveApi from '@/lib/pto-api';
-
 const seedBalance = {
   employeeId: 'emp-1',
   locationId: 'loc-us',
@@ -45,20 +37,7 @@ function Wrapper({ children }: { children: React.ReactNode }) {
 }
 
 describe('Optimistic update: balance deduction', () => {
-  beforeEach(() => {
-    vi.mocked(leaveApi.fetchBatchBalances).mockResolvedValue({
-      balances: [seedBalance],
-      generatedAt: '2026-01-01T00:00:00.000Z',
-    });
-  });
-
   it('shows "Pending" badge immediately on submit before HCM responds', async () => {
-    let resolveSubmit!: (v: TimeOffSubmissionResponse) => void;
-    vi.mocked(leaveApi.submitTimeOffRequest).mockReturnValue(
-      new Promise((res) => { resolveSubmit = res; })
-    );
-
-    const user = userEvent.setup();
     const { rerender } = render(
       <Wrapper>
         <BalanceCard balance={seedBalance} isOptimistic={false} />

@@ -53,7 +53,7 @@ const pendingRequest: TimeOffRequest = {
 
 describe('ManagerClient: empty state', () => {
   it('shows the empty-pending placeholder when there are no requests', () => {
-    render(<ManagerClient requestsWithBalances={[]} />);
+    render(<ManagerClient requestsWithBalances={[]} anniversaryEligibility={[]} />);
     expect(screen.getByTestId('empty-pending')).toBeInTheDocument();
   });
 });
@@ -63,7 +63,7 @@ describe('ManagerClient: empty state', () => {
 describe('ManagerClient: request list', () => {
   it('renders a request card for each pending request', () => {
     render(
-      <ManagerClient
+      <ManagerClient anniversaryEligibility={[]}
         requestsWithBalances={[{ request: pendingRequest, balance }]}
       />
     );
@@ -74,7 +74,7 @@ describe('ManagerClient: request list', () => {
     vi.mocked(approveTimeOff).mockResolvedValue(undefined);
     const user = userEvent.setup();
     render(
-      <ManagerClient
+      <ManagerClient anniversaryEligibility={[]}
         requestsWithBalances={[{ request: pendingRequest, balance }]}
       />
     );
@@ -88,7 +88,7 @@ describe('ManagerClient: request list', () => {
     vi.mocked(denyTimeOff).mockResolvedValue(undefined);
     const user = userEvent.setup();
     render(
-      <ManagerClient
+      <ManagerClient anniversaryEligibility={[]}
         requestsWithBalances={[{ request: pendingRequest, balance }]}
       />
     );
@@ -102,7 +102,7 @@ describe('ManagerClient: request list', () => {
     vi.mocked(approveTimeOff).mockRejectedValue(new Error('HCM unreachable'));
     const user = userEvent.setup();
     render(
-      <ManagerClient
+      <ManagerClient anniversaryEligibility={[]}
         requestsWithBalances={[{ request: pendingRequest, balance }]}
       />
     );
@@ -118,13 +118,13 @@ describe('ManagerClient: request list', () => {
 
 describe('ManagerClient: accessibility', () => {
   it('empty state has no WCAG violations', async () => {
-    const { container } = render(<ManagerClient requestsWithBalances={[]} />);
+    const { container } = render(<ManagerClient requestsWithBalances={[]} anniversaryEligibility={[]} />);
     expect(await axe(container)).toHaveNoViolations();
   });
 
   it('request list has no WCAG violations', async () => {
     const { container } = render(
-      <ManagerClient
+      <ManagerClient anniversaryEligibility={[]}
         requestsWithBalances={[{ request: pendingRequest, balance }]}
       />
     );

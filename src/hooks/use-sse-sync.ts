@@ -27,10 +27,13 @@ export function useSSESync() {
     if (typeof EventSource === "undefined") return;
 
     const es = new EventSource("/route/pto/events");
-    es.addEventListener("balance-update", () => {
+    const onUpdate = () => {
       setIsStale(true);
       router.refresh();
-    });
+    };
+    // Listen for both event names — see sse-bus.ts comment.
+    es.addEventListener("pto-update", onUpdate);
+    es.addEventListener("balance-update", onUpdate);
 
     return () => es.close();
   }, [router]);

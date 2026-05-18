@@ -14,6 +14,7 @@
 import React from 'react';
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { axe } from 'jest-axe';
 import { EmployeeClient } from '@/components/employee/EmployeeClient';
 import type { Balance, TimeOffRequest } from '@/types';
 
@@ -121,5 +122,40 @@ describe('EmployeeClient: zero-balance edge case', () => {
       />
     );
     expect(screen.getByTestId('balance-card')).toBeInTheDocument();
+  });
+});
+
+// ── Accessibility ──────────────────────────────────────────────────────────
+
+describe('EmployeeClient: accessibility', () => {
+  it('multi-location + request history view has no WCAG violations', async () => {
+    const { container } = render(
+      <EmployeeClient
+        initialBalances={[usBalance, ukBalance]}
+        initialRequests={[approvedRequest]}
+      />
+    );
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it('empty state has no WCAG violations', async () => {
+    const { container } = render(
+      <EmployeeClient
+        initialBalances={[usBalance]}
+        initialRequests={[]}
+      />
+    );
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it('zero-balance state has no WCAG violations', async () => {
+    const zeroBalance: Balance = { ...usBalance, available: 0 };
+    const { container } = render(
+      <EmployeeClient
+        initialBalances={[zeroBalance]}
+        initialRequests={[]}
+      />
+    );
+    expect(await axe(container)).toHaveNoViolations();
   });
 });

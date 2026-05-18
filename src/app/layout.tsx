@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Geist } from "next/font/google";
 import "./globals.css";
 import { auth, getSessionUser } from "@/auth";
@@ -34,6 +35,24 @@ export default async function RootLayout({
               <>
                 <span className="text-sm text-gray-600">{sessionUser.name}</span>
                 <span className="text-xs text-gray-400 capitalize">{sessionUser.role}</span>
+                {sessionUser.role === "manager" && (
+                  <div className="ml-4 flex gap-3 text-sm">
+                    <Link
+                      href="/manager"
+                      className="font-medium text-gray-600 hover:text-indigo-600"
+                      data-testid="nav-manager"
+                    >
+                      Approvals
+                    </Link>
+                    <Link
+                      href="/employee"
+                      className="font-medium text-gray-600 hover:text-indigo-600"
+                      data-testid="nav-employee"
+                    >
+                      My time off
+                    </Link>
+                  </div>
+                )}
                 <form action={logout} className="ml-auto">
                   <button
                     type="submit"

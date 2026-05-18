@@ -11,10 +11,8 @@ export default auth((req) => {
 
   const { role } = getSessionUser(session);
 
-  if (pathname.startsWith("/employee") && role !== "employee") {
-    return NextResponse.redirect(new URL("/manager", req.url));
-  }
-
+  // Managers may visit /employee (read-only employee view). Employees may not
+  // visit /manager.
   if (pathname.startsWith("/manager") && role !== "manager") {
     return NextResponse.redirect(new URL("/employee", req.url));
   }

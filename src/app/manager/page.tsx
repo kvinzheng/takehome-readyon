@@ -1,6 +1,10 @@
 import { auth, getSessionUser } from "@/auth";
 import { redirect } from "next/navigation";
-import { dalGetPendingRequests, dalGetBalance } from "@/lib/pto-dal";
+import {
+  dalGetPendingRequests,
+  dalGetBalance,
+  dalGetAnniversaryEligibility,
+} from "@/lib/pto-dal";
 import { ManagerClient } from "@/components/manager/ManagerClient";
 
 export default async function ManagerPage() {
@@ -9,7 +13,10 @@ export default async function ManagerPage() {
   const user = getSessionUser(session);
   if (user.role !== "manager") redirect("/login");
 
-  const pendingRequests = await dalGetPendingRequests();
+  const [pendingRequests, anniversaryEligibility] = await Promise.all([
+    dalGetPendingRequests(),
+    dalGetAnniversaryEligibility(),
+  ]);
 
   // Fetch live balance for every pending request in parallel — authoritative
   // snapshot at decision time, not cached.
@@ -30,7 +37,10 @@ export default async function ManagerPage() {
           {user.name} · Manager — balances shown are live PTO system reads
         </p>
       </header>
-      <ManagerClient requestsWithBalances={requestsWithBalances} />
+      <ManagerClient
+        requestsWithBalances={requestsWithBalances}
+        anniversaryEligibility={anniversaryEligibility}
+      />
     </div>
   );
 }

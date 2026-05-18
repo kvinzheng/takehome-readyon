@@ -152,13 +152,25 @@ export function isWorkAnniversary(employeeId: string): boolean {
   return hire.getMonth() === today.getMonth() && hire.getDate() === today.getDate();
 }
 
-/** Fire a work-anniversary bonus (+5 days) for an employee+location pair */
+function grantKey(employeeId: string, locationId: string): string {
+  return `${employeeId}:${locationId}:${new Date().getFullYear()}`;
+}
+
+/** Has this employee already received an anniversary bonus for this location in the current calendar year? */
+export function hasGrantedAnniversaryThisYear(
+  employeeId: string,
+  locationId: string
+): boolean {
+  return anniversaryGranted.has(grantKey(employeeId, locationId));
+}
+
+/** Fire a work-anniversary bonus (+5 days) for an employee+location pair. Idempotent per calendar year. */
 export function grantAnniversaryBonus(
   employeeId: string,
   locationId: string
-): { granted: boolean; balance?: Balance } {
-  const grantKey = `${employeeId}:${locationId}:anniversary`;
-  if (anniversaryGranted.has(grantKey)) {
+): { granted: boolean; balance?: Balance; bonus?: number } {
+  const gKey = grantKey(employeeId, locationId);
+  if (anniversaryGranted.has(gKey)) {
     return { granted: false };
   }
   const key = balanceKey(employeeId, locationId);
@@ -173,8 +185,8 @@ export function grantAnniversaryBonus(
     asOf: new Date().toISOString(),
   };
   balanceStore.set(key, updated);
-  anniversaryGranted.add(grantKey);
-  return { granted: true, balance: updated };
+  anniversaryGranted.add(gKey);
+  return { granted: true, balance: updated, bonus };
 }
 
 // ─── Request store ────────────────────────────────────────────────────────────

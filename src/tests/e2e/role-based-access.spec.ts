@@ -82,10 +82,11 @@ test("/employee as employee renders the dashboard", async ({ page }) => {
   await expect(page.getByTestId("balance-card").first()).toBeVisible();
 });
 
-test("/employee as manager → /manager (role mismatch)", async ({ page }) => {
+test("/employee as manager renders the employee dashboard (read-only access)", async ({ page }) => {
   await login(page, MANAGER.email, MANAGER.password);
   await page.goto("/employee");
-  await expect(page).toHaveURL(/\/manager$/);
+  await expect(page).toHaveURL(/\/employee$/);
+  await expect(page.getByTestId("employee-view")).toBeVisible();
 });
 
 // ── /manager ───────────────────────────────────────────────────────────────

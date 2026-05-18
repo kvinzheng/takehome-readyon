@@ -1,4 +1,4 @@
-import { onBalanceUpdate } from "@/lib/sse-bus";
+import { onPtoUpdate } from "@/lib/sse-bus";
 
 export function createEventsStream(signal: AbortSignal): ReadableStream<Uint8Array> {
   const encoder = new TextEncoder();
@@ -10,8 +10,12 @@ export function createEventsStream(signal: AbortSignal): ReadableStream<Uint8Arr
 
       enqueue("event: connected\ndata: {}\n\n");
 
-      const unsub = onBalanceUpdate((payload) => {
-        enqueue(`event: balance-update\ndata: ${JSON.stringify(payload)}\n\n`);
+      const unsub = onPtoUpdate((payload) => {
+        // Emit BOTH the new generic event and the legacy balance-update name
+        // so older clients keep working during rollout.
+        const data = JSON.stringify(payload);
+        enqueue(`event: pto-update\ndata: ${data}\n\n`);
+        enqueue(`event: balance-update\ndata: ${data}\n\n`);
       });
 
       const ping = setInterval(() => {
