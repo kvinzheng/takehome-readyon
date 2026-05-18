@@ -127,17 +127,76 @@ NextAuth v5 with a JWT strategy. The `role` claim (`employee` | `manager`) is em
 
 ### Key design decisions
 
-**Optimistic updates (employee) / pessimistic (manager)**
-Employees see instant feedback on submission — the balance deducts optimistically and rolls back on error. Managers wait for a real confirmation before seeing state change — a wrong approval has legal/pay consequences.
+Each choice below was made by asking: *given an external source of truth we don't control, what's the safest behavior?*
 
-**Silent failure defence**
-HCM may return HTTP 200 with `status: "silent_failure"`. `useTimeOffSubmit` detects this and shows a warning instead of a success banner. The `router.refresh()` triggered by the next SSE event (or manual navigation) reconciles the balance back to the real value.
+#### 1. Server Components first, Client Components only for interactivity
 
-**No client-side data fetching hooks**
-In App Router, Server Components fetch data. Hooks own client-side mutations and reactive state only. Moving fetches to hooks would lose SSR, introduce waterfalls, and require manual cache management.
+**Decision:** Every page is an async Server Component that fetches data via the DAL and passes it as props to a `*Client` wrapper. No `useEffect(fetch...)` for initial loads.
 
-**Router cache for cross-page persistence**
-Next.js caches RSC payloads client-side for the session. Employee → Manager → back to Employee reuses the cached payload — no re-fetch, no hook needed.
+**Why:** Fetching on the server keeps balances out of `localStorage`, eliminates a loading flicker, and gives auth a single chokepoint (`auth()` runs before any fetch). Client Components only own things that genuinely need the browser: form state, optimistic UI, SSE subscription.
+
+**Considered and rejected:**
+- *All-client SPA with TanStack Query* — would need a separate client cache layer, lose SSR, and complicate auth.
+- *Server Components everywhere with Server Actions for every read* — actions are mutation-shaped; readers should be `cache()`-wrapped functions.
+
+#### 2. Optimistic on the employee side, pessimistic on the manager side
+
+**Decision:** `useTimeOffSubmit` deducts the balance instantly via `useOptimistic`. The manager view waits for the real response before updating UI.
+
+**Why:** Asymmetric stakes. A wrong optimistic deduction on the employee side is recoverable — it auto-reverts on error and the user sees the corrected number. A wrong optimistic "approved" on the manager side could mean somebody books a flight against a denied request. Approve/deny stays pessimistic.
+
+#### 3. Silent-failure defence as a first-class state
+
+**Decision:** Treat `status: "silent_failure"` as a distinct response, not an error and not a success. Show a yellow warning, not a green banner, and rely on the next `router.refresh()` to reconcile.
+
+**Why:** The brief explicitly calls out "assume a success response can still be wrong." A naive client treats HTTP 200 as truth. We carry a discriminated union (`accepted` | `silent_failure`) through the entire stack so the UI can render the third state honestly.
+
+#### 4. Real-time push via SSE, not polling or WebSockets
+
+**Decision:** `GET /route/pto/events` is an SSE stream. `useSSESync()` subscribes once per tab and calls `router.refresh()` on every `balance-update` frame.
+
+**Why:** The bonus is server-initiated, one-way, infrequent, and tiny. SSE matches that exactly. Polling would burn requests for nothing 99% of the time; WebSockets would add complexity (handshake, heartbeats, framing) we don't need. `EventSource` reconnects automatically.
+
+**Considered and rejected:**
+- *15-second polling* — wasted requests, worse UX, no real benefit.
+- *WebSockets via Socket.IO* — bidirectional channel we don't need.
+- *Client-side timer that refetches on focus* — misses cross-tab updates entirely.
+
+> **Note:** The in-process `EventEmitter` bus works for single-instance deployments. Multi-replica deployments would replace it with Redis pub/sub.
+
+#### 5. Stale-data warning UI wired to the SSE event
+
+**Decision:** When SSE fires, `useSSESync` flips `isStale = true` immediately and triggers `router.refresh()`. The UI shows a `StaleWarning` banner and a "Pending refresh" badge on each `BalanceCard` until the new server payload arrives, at which point `useEffect([initialBalances])` clears the stale flag.
+
+**Why:** The brief asks for "graceful reconciliation." A silent re-render that just shows new numbers is *too* graceful — users distrust numbers that move without explanation. The amber stale state gives them a 200ms heads-up plus a manual refresh button.
+
+#### 6. Caching strategy — server-side only
+
+**Decision:**
+- `React.cache()` wraps the 4 DAL read functions (`dalGetBalance`, `dalGetEmployeeBalances`, `dalGetEmployeeRequests`, `dalGetPendingRequests`) for per-request dedupe.
+- `Cache-Control: private, no-store` on all mutable/per-user JSON routes.
+- `Cache-Control: public, max-age=300, stale-while-revalidate=3600` on the reference-data route (`/route/pto/employees`).
+- SSE route gets `no-cache, no-transform`.
+
+**Why:** Balances are external-source-of-truth data — caching them across requests on either server or client risks shipping stale numbers that the user trusts. `React.cache()` is safe because it dies at the end of the request. Cross-request caching is only used where the data is genuinely static.
+
+**Considered and rejected:**
+- *TanStack Query / SWR on the client* — would re-introduce stale-data risk that SSE was built to prevent, and offers no value when RSC already delivers fresh server data.
+- *React Context as a balance cache* — context is for sharing, not caching; couples unrelated subtrees to a single re-render.
+- *`unstable_cache()` on balances* — wrong tool for data the external system can mutate without our knowledge.
+- *`localStorage`* — security, cross-tab divergence, cross-device divergence; nothing to gain.
+
+#### 7. Handler/route split with typed errors
+
+**Decision:** Each endpoint has a thin route wrapper in [src/app/route/pto/](src/app/route/pto/) that parses HTTP input and calls a pure handler from [src/route/pto/](src/route/pto/). Handlers throw typed `ApiError` subclasses (`ValidationError`, `NotFoundError`, `ConflictError`, `InsufficientBalanceError`); the wrapper serializes them via `handleRoute()`.
+
+**Why:** Pure handlers are unit-testable without spinning up a request mock. Typed errors give us correct HTTP status codes for free and prevent the "every error is 500" anti-pattern. The split also makes it trivial to swap the transport (REST → tRPC → gRPC) without rewriting business logic.
+
+#### 8. NextAuth at three layers, defense in depth
+
+**Decision:** Auth is enforced in `proxy.ts` (edge), each `page.tsx` (server), and each server action (mutation boundary). Roles (`employee` | `manager`) are baked into the JWT.
+
+**Why:** Edge guard catches 99% of unauthorized requests before any code runs. Page guard provides typed `getSessionUser()` for the rest. Server-action guard ensures even a forged client call can't trigger an unauthorized mutation. Each layer assumes the others might be misconfigured.
 
 ---
 
@@ -199,4 +258,25 @@ src/
 | `/route/pto/events` | GET | SSE stream — balance-update push |
 | `/route/pto/anniversary-bonus` | POST | Test harness: trigger bonus manually |
 | `/route/pto/employees` | GET | List employees |
+
+**Forcing scenarios for tests:** Send `x-pto-scenario: silent_failure | conflict | insufficient | validation` as a request header on `POST /route/pto/requests` to deterministically hit a failure path. Without the header, silent failures fire on ~5% of requests randomly.
+
+---
+
+## Testing Strategy
+
+The brief says future contributors must not be able to silently break this system. The test pyramid is shaped accordingly:
+
+| Layer | Count | What it guards | When it runs |
+|---|---|---|---|
+| **Unit** — `pto-store` | 15 | Pure deduction / restore / anniversary logic. The math that protects the balance never lies. | Every commit (`npm test`) |
+| **Unit** — API handlers | 24 | Each handler's happy path + all typed error paths (validation, not-found, conflict, insufficient, silent failure). Catches regressions in business rules without touching HTTP. | Every commit |
+| **Component** | 29 | Each UI component's render states (loading, empty, optimistic, error, accessible). Backstops the Storybook visual contract. | Every commit |
+| **Integration** | 26 | Real `EmployeeClient` / `ManagerClient` against a mocked Server Action layer. Verifies the optimistic-then-reconcile flow end-to-end. | Every commit |
+| **Acceptance** | 23 | Per-route AC framed as Given/When/Then. Verifies the spec, not the implementation. Includes a11y violations check via `jest-axe`. | Every commit |
+| **Storybook interaction** | — | Visual + interaction tests via `@storybook/addon-vitest`. | `npm run test:all` |
+
+**117 unit-project tests pass on every commit.** Storybook tests run separately because Playwright is slower and shouldn't gate fast feedback.
+
+**Deliberate omissions:** No end-to-end browser tests (Playwright). The single-process in-memory store means there's no orchestration to verify that a unit/integration test can't already cover. Adding Playwright later for cross-tab SSE behavior is straightforward.
 
