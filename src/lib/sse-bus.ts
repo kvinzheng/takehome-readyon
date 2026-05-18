@@ -10,8 +10,17 @@ import { EventEmitter } from "events";
  *
  * In a multi-instance deployment you would replace this with Redis pub/sub
  * or a similar external channel.
+ *
+ * NOTE: stashed on globalThis so HMR / Turbopack module re-evaluation in dev
+ * (and the separate module graphs Next builds for route handlers vs. server
+ * actions in prod) all share the *same* emitter instance. Without this, an
+ * emit from a Server Action never reaches the listener registered by the SSE
+ * route handler.
  */
-const sseBus = new EventEmitter();
+const globalForSse = globalThis as unknown as { __ptoSseBus?: EventEmitter };
+const sseBus =
+  globalForSse.__ptoSseBus ??
+  (globalForSse.__ptoSseBus = new EventEmitter());
 sseBus.setMaxListeners(200); // one per open browser tab
 
 // ── Payload types ─────────────────────────────────────────────────────────
