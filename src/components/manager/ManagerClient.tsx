@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useTransition } from "react";
+import React from "react";
 import { RequestCard } from "../shared/RequestCard";
-import { approveTimeOff, denyTimeOff } from "@/app/actions";
+import { useManagerAction } from "@/hooks/use-manager-action";
 import type { Balance, TimeOffRequest } from "@/types";
 
 interface RequestWithBalance {
@@ -15,24 +15,8 @@ interface Props {
 }
 
 export function ManagerClient({ requestsWithBalances }: Props) {
-  const [isPending, startTransition] = useTransition();
-  const [actingId, setActingId] = useState<string | null>(null);
-
-  function handleApprove(id: string) {
-    setActingId(id);
-    startTransition(async () => {
-      await approveTimeOff(id);
-      setActingId(null);
-    });
-  }
-
-  function handleDeny(id: string) {
-    setActingId(id);
-    startTransition(async () => {
-      await denyTimeOff(id);
-      setActingId(null);
-    });
-  }
+  const { actingId, isPending, actionError, handleApprove, handleDeny } =
+    useManagerAction();
 
   if (requestsWithBalances.length === 0) {
     return (
@@ -47,6 +31,15 @@ export function ManagerClient({ requestsWithBalances }: Props) {
 
   return (
     <div className="space-y-4">
+      {actionError && (
+        <p
+          className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
+          data-testid="action-error"
+          role="alert"
+        >
+          {actionError}
+        </p>
+      )}
       {requestsWithBalances.map(({ request, balance }) => (
         <RequestCard
           key={request.id}

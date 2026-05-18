@@ -25,7 +25,7 @@ interface UseTimeOffSubmitReturn {
  *  - Optimistic balance deduction (reverts automatically on error)
  *  - Silent-failure detection (200 OK but no PTO commitment)
  *  - Success / error messaging
- *  - isSubmitting flag that resets synchronously in finally (safe in jsdom)
+ *  - isSubmitting flag resets synchronously in finally (deterministic under jsdom)
  */
 export function useTimeOffSubmit(
   employeeId: string,
