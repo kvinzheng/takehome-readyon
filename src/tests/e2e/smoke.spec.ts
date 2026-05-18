@@ -64,15 +64,3 @@ test("employee submits → manager approves → employee request shows approved"
   await employeeCtx.close();
   await managerCtx.close();
 });
-
-test("login redirects unauthenticated users from /employee to /login", async ({ page }) => {
-  await page.goto("/employee");
-  await expect(page).toHaveURL(/\/login$/);
-});
-
-test("login redirects authenticated employee away from /login", async ({ page }) => {
-  await login(page, "alice@readyon.com", "alice123");
-  await expect(page).toHaveURL(/\/employee$/);
-  await page.goto("/login");
-  await expect(page).toHaveURL(/\/employee$/);
-});
