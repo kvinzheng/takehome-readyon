@@ -1,10 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { BalanceCard } from "./BalanceCard";
 import { TimeOffForm } from "./TimeOffForm";
 import { RequestCard } from "../shared/RequestCard";
-import { SuccessBanner, ErrorBanner } from "../shared/StatusBanners";
+import { SuccessBanner, ErrorBanner, StaleWarning } from "../shared/StatusBanners";
 import { useTimeOffSubmit } from "@/hooks/use-time-off-submit";
 import { useSSESync } from "@/hooks/use-sse-sync";
 import { useUser } from "@/context/UserContext";
@@ -16,14 +16,27 @@ interface Props {
 }
 
 export function EmployeeClient({ initialBalances, initialRequests }: Props) {
-  useSSESync();
+  const { isStale, clearStale, refresh } = useSSESync();
   const { user } = useUser();
+
+  // When the server re-renders with fresh data (initialBalances prop changes
+  // after router.refresh()), mark the displayed balances as current again.
+  useEffect(() => {
+    clearStale();
+  }, [initialBalances, clearStale]);
 
   const { optimisticBalances, isSubmitting, successMsg, submitError, handleSubmit } =
     useTimeOffSubmit(user?.id ?? "", initialBalances);
 
   return (
     <>
+      {/* Stale-data warning — shown when SSE fires until fresh props arrive */}
+      {isStale && (
+        <div className="mb-4">
+          <StaleWarning onRefresh={refresh} />
+        </div>
+      )}
+
       {/* Balances */}
       <section aria-label="Balance overview" className="mb-8">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-400">
@@ -35,6 +48,7 @@ export function EmployeeClient({ initialBalances, initialRequests }: Props) {
               key={`${b.employeeId}-${b.locationId}`}
               balance={b}
               isOptimistic={isSubmitting}
+              isStale={isStale}
             />
           ))}
         </div>

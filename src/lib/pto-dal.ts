@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+
 import {
   getBalance,
   getBalancesForEmployee,
@@ -26,28 +28,36 @@ function delay(min: number, max: number): Promise<void> {
   return new Promise((r) => setTimeout(r, min + Math.random() * (max - min)));
 }
 
-export async function dalGetBalance(
-  employeeId: string,
-  locationId: string
-): Promise<Balance | null> {
-  await delay(50, 150);
-  return getBalance(employeeId, locationId) ?? null;
-}
+// ─── Read APIs ────────────────────────────────────────────────────────────────
+// Wrapped in React.cache() to dedupe identical reads within a single server
+// render. Cache lives for the lifetime of one request only — no cross-request
+// staleness risk, no manual invalidation required.
 
-export async function dalGetEmployeeBalances(employeeId: string): Promise<Balance[]> {
-  await delay(50, 150);
-  return getBalancesForEmployee(employeeId);
-}
+export const dalGetBalance = cache(
+  async (employeeId: string, locationId: string): Promise<Balance | null> => {
+    await delay(50, 150);
+    return getBalance(employeeId, locationId) ?? null;
+  }
+);
 
-export async function dalGetEmployeeRequests(employeeId: string): Promise<TimeOffRequest[]> {
-  await delay(30, 100);
-  return getRequestsForEmployee(employeeId);
-}
+export const dalGetEmployeeBalances = cache(
+  async (employeeId: string): Promise<Balance[]> => {
+    await delay(50, 150);
+    return getBalancesForEmployee(employeeId);
+  }
+);
 
-export async function dalGetPendingRequests(): Promise<TimeOffRequest[]> {
+export const dalGetEmployeeRequests = cache(
+  async (employeeId: string): Promise<TimeOffRequest[]> => {
+    await delay(30, 100);
+    return getRequestsForEmployee(employeeId);
+  }
+);
+
+export const dalGetPendingRequests = cache(async (): Promise<TimeOffRequest[]> => {
   await delay(30, 100);
   return getPendingRequests();
-}
+});
 
 export async function dalSubmitTimeOff(
   body: SubmitTimeOffPayload,
