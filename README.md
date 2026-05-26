@@ -43,7 +43,7 @@ npm run storybook    # http://localhost:6006  (optional)
 ```bash
 npm test                   # 74 vitest tests: unit + component + integration
 npm run test:all           # Above + Storybook interaction tests
-npm run test:acceptance    # 3 Playwright specs (role access, approval flow, anniversary SSE)
+npm run test:e2e           # 4 Playwright specs (role access, approval, denial, anniversary SSE)
 node scripts/measure-lcp.mjs   # Capture LCP/FCP/TTFB against a running prod build
 ```
 
@@ -99,7 +99,7 @@ The most interesting thing about this app is that **changes propagate across bro
    In Window A pick a date range longer than the US balance (e.g. 9 days when 6 are available). The form shows a red **"N days selected — exceeds available balance"** hint and the submit button stays disabled. The check is client-side for instant feedback *and* re-validated server-side in `submitTimeOff()` — so it can't be bypassed via DevTools.
 
 10. **Test #7 — role-based access**
-    In Window A (Alice / employee) try to visit http://localhost:3000/manager — you should be redirected to `/employee`. The same redirect happens in reverse if Carol visits `/employee`. Auth checks live in the page Server Components (`src/app/manager/page.tsx`, `src/app/employee/page.tsx`) and are also covered by `src/tests/acceptance/role-based-access.spec.ts`.
+    In Window A (Alice / employee) try to visit http://localhost:3000/manager — you should be redirected to `/employee`. The same redirect happens in reverse if Carol visits `/employee`. Auth checks live in the page Server Components (`src/app/manager/page.tsx`, `src/app/employee/page.tsx`) and are also covered by `src/tests/e2e/role-based-access.spec.ts`.
 
 11. **Test #8 — SSE reconnect (resilience)**
     With both windows open and signed in, kill the dev server (`Ctrl-C` in the terminal) then restart it (`npm run dev`). Within ~3 seconds the browser's `EventSource` reconnects automatically — submit a request in Window A and confirm Window B still updates live without a manual reload. The reconnection logic is built into `EventSource` itself; we just don't fight it.
@@ -411,14 +411,26 @@ scripts/
 
 ## Test pyramid
 
-| Layer | Files | What it guards |
-|---|---|---|
-| Unit | `tests/unit/pto-store.test.ts` | Deduction / restore / anniversary idempotency |
-| Component | `tests/components/*.test.tsx` | Each component's render states + WCAG via `jest-axe` |
-| Integration | `tests/integration/*.test.tsx` | `EmployeeClient` / `ManagerClient` against mocked actions; optimistic + reconcile flow + a11y |
-| Acceptance | `tests/acceptance/*.spec.ts` | Per-requirement business flows in real Chromium (Playwright): role-based access, full approval lifecycle, anniversary SSE |
+Folder layout follows the Ember convention: the tier is the top-level folder; "what kind of thing" is the subfolder. There is no separate `components/` tier — component tests are a *kind of* integration test (they integrate a component with the DOM) and live under `integration/components/`.
 
-**74 vitest tests + 3 Playwright specs, all green.** Accessibility is asserted at every layer.
+| Tier | Files | What it guards |
+|---|---|---|
+| Unit | `tests/unit/lib/*.test.ts` | Pure store logic: deduction / restore / anniversary idempotency, plus multi-function request lifecycle |
+| Integration (component+DOM) | `tests/integration/components/*.test.tsx` | Each component's render states, hooks wired in, WCAG via `jest-axe` — only Server Actions mocked |
+| E2E | `tests/e2e/*.spec.ts` | Per-requirement business flows in real Chromium (Playwright): role-based access, approval, denial, anniversary SSE |
+
+**74 vitest tests + 4 Playwright specs, all green.** Accessibility is asserted at every tier.
+
+### CI vs staging e2e
+
+Two Playwright configs encode the standard split:
+
+| Config | Target | When |
+|---|---|---|
+| [playwright.config.ts](playwright.config.ts) | `localhost:3000` (boots `npm run dev`) | Local dev + PR-gating CI |
+| [playwright.staging.config.ts](playwright.staging.config.ts) | `$STAGING_URL` (no webServer) | Post-deploy smoke against staging |
+
+The staging config is a skeleton — when a real staging environment exists, CI sets `STAGING_URL` and runs `npm run test:e2e:staging` after deploy.
 
 ---
 
